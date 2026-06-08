@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: transparent; font-family: var(--font-sans, sans-serif); }
+
+.arch-wrap { padding: 12px 0 0; }
+
+.legend {
+  display: flex; gap: 16px; flex-wrap: wrap; padding: 0 8px 14px;
+  font-size: 12px; color: var(--color-text-secondary);
+}
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.tab-row {
+  display: flex; gap: 6px; padding: 0 4px 12px; flex-wrap: wrap;
+}
+.tab {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary); transition: all .15s;
+  white-space: nowrap;
+}
+.tab:hover { border-color: var(--color-border-primary); color: var(--color-text-primary); }
+.tab.active {
+  background: var(--color-text-primary); color: var(--color-background-primary);
+  border-color: var(--color-text-primary);
+}
+
+.diagram-panel { display: none; }
+.diagram-panel.visible { display: block; }
+
+/* callout cards */
+.callout-row {
+  display: flex; gap: 10px; flex-wrap: wrap; padding: 10px 4px 0;
+}
+.callout {
+  flex: 1 1 180px; min-width: 160px;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg, 12px);
+  padding: 10px 12px;
+  background: var(--color-background-secondary);
+}
+.callout-title { font-size: 12px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.callout-body { font-size: 11px; color: var(--color-text-secondary); line-height: 1.55; }
+.callout.accent-purple { border-left: 3px solid #7F77DD; }
+.callout.accent-teal   { border-left: 3px solid #1D9E75; }
+.callout.accent-coral  { border-left: 3px solid #D85A30; }
+.callout.accent-amber  { border-left: 3px solid #BA7517; }
+
+</style>
+</head>
+<body>
+
+<div class="arch-wrap">
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#7F77DD"></div>Flutter app (local)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Cloudflare Workers (edge)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div>External threat intel</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#BA7517"></div>Security Center UI</div>
+</div>
+
+<div class="tab-row">
+  <div class="tab active" onclick="show('overview')">Overview</div>
+  <div class="tab" onclick="show('phishing')">Phishing detection</div>
+  <div class="tab" onclick="show('credential')">Credential hygiene</div>
+  <div class="tab" onclick="show('exposure')">Exposure & login</div>
+  <div class="tab" onclick="show('triage')">Unified triage</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="diagram-panel visible" id="panel-overview">
+<svg width="100%" viewBox="0 0 680 580" role="img">
+<title>BLT-Vanish overall architecture</title>
+<desc>Four-layer architecture: Security Center UI at top, Flutter local engine below, Cloudflare Workers at edge, and external threat intel at the bottom.</desc>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- LAYER 1: UI -->
+<rect x="30" y="20" width="620" height="90" rx="14" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.8"/>
+<text x="50" y="43" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#633806">Security Center UI  (Flutter widgets)</text>
+
+<rect x="50" y="52" width="120" height="44" rx="6" fill="#FAC775" stroke="#BA7517" stroke-width="0.5"/>
+<text x="110" y="73" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Scan input</text>
+<text x="110" y="87" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">URL / message</text>
+
+<rect x="192" y="52" width="120" height="44" rx="6" fill="#FAC775" stroke="#BA7517" stroke-width="0.5"/>
+<text x="252" y="73" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Severity card</text>
+<text x="252" y="87" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Color + reason codes</text>
+
+<rect x="334" y="52" width="120" height="44" rx="6" fill="#FAC775" stroke="#BA7517" stroke-width="0.5"/>
+<text x="394" y="73" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Triage queue</text>
+<text x="394" y="87" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Ranked actions</text>
+
+<rect x="476" y="52" width="144" height="44" rx="6" fill="#FAC775" stroke="#BA7517" stroke-width="0.5"/>
+<text x="548" y="73" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Remediation CTA</text>
+<text x="548" y="87" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Step-by-step guidance</text>
+
+<!-- Arrow UI -> local -->
+<line x1="340" y1="112" x2="340" y2="145" stroke="#888780" stroke-width="1" marker-end="url(#arr)"/>
+<text x="350" y="132" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">user events</text>
+<line x1="340" y1="200" x2="340" y2="113" stroke="#888780" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+<text x="350" y="188" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">SecurityAlert</text>
+
+<!-- LAYER 2: Flutter Local Engine -->
+<rect x="30" y="150" width="620" height="115" rx="14" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="50" y="172" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C">Flutter local engine  (on-device, zero PII leaves)</text>
+
+<rect x="50" y="182" width="130" height="68" rx="6" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.5"/>
+<text x="115" y="203" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Signal extractor</text>
+<text x="115" y="217" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">URL entropy</text>
+<text x="115" y="229" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Msg indicators</text>
+<text x="115" y="241" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Credential strength</text>
+
+<rect x="200" y="182" width="130" height="68" rx="6" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.5"/>
+<text x="265" y="203" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Risk scorer</text>
+<text x="265" y="217" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Weighted formula</text>
+<text x="265" y="229" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Severity mapping</text>
+<text x="265" y="241" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Confidence band</text>
+
+<rect x="350" y="182" width="130" height="68" rx="6" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.5"/>
+<text x="415" y="203" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Remediation planner</text>
+<text x="415" y="217" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Task state machine</text>
+<text x="415" y="229" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Escalation logic</text>
+<text x="415" y="241" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Progress tracking</text>
+
+<rect x="500" y="182" width="128" height="68" rx="6" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.5"/>
+<text x="564" y="203" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Encrypted store</text>
+<text x="564" y="217" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Hashed snapshots</text>
+<text x="564" y="229" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">No plaintext creds</text>
+<text x="564" y="241" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Risk timeline</text>
+
+<!-- internal arrows local engine -->
+<line x1="180" y1="216" x2="198" y2="216" stroke="#7F77DD" stroke-width="1" marker-end="url(#arr)"/>
+<line x1="330" y1="216" x2="348" y2="216" stroke="#7F77DD" stroke-width="1" marker-end="url(#arr)"/>
+<line x1="480" y1="216" x2="498" y2="216" stroke="#7F77DD" stroke-width="1" marker-end="url(#arr)"/>
+
+<!-- Arrow local -> worker (non-PII domain) -->
+<line x1="170" y1="267" x2="170" y2="300" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="175" y="288" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">domain only</text>
+
+<!-- Arrow worker -> local (reputation) -->
+<line x1="220" y1="300" x2="220" y2="268" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+<text x="225" y="290" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">reputation ≤1500ms</text>
+
+<!-- LAYER 3: Cloudflare Workers -->
+<rect x="30" y="305" width="620" height="110" rx="14" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.8"/>
+<text x="50" y="327" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C">Cloudflare Workers  (edge, non-PII only)</text>
+
+<rect x="50" y="337" width="135" height="62" rx="6" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
+<text x="117" y="358" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C" dominant-baseline="central">Reputation API</text>
+<text x="117" y="372" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">/api/reputation/:domain</text>
+<text x="117" y="384" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Domain score + flags</text>
+
+<rect x="205" y="337" width="135" height="62" rx="6" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
+<text x="272" y="358" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C" dominant-baseline="central">Health check</text>
+<text x="272" y="372" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">/api/health/:id</text>
+<text x="272" y="384" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Liveness signals</text>
+
+<rect x="360" y="337" width="135" height="62" rx="6" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
+<text x="427" y="358" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C" dominant-baseline="central">Broker catalog</text>
+<text x="427" y="372" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Opt-out templates</text>
+<text x="427" y="384" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Broker listings</text>
+
+<rect x="515" y="337" width="113" height="62" rx="6" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5"/>
+<text x="571" y="358" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C" dominant-baseline="central">Rate limiter</text>
+<text x="571" y="372" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Timeout budgets</text>
+<text x="571" y="384" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Retry policies</text>
+
+<!-- Arrow worker -> external -->
+<line x1="260" y1="417" x2="260" y2="448" stroke="#D85A30" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="266" y="436" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#993C1D">threat queries</text>
+
+<!-- Arrow external -> worker -->
+<line x1="320" y1="448" x2="320" y2="418" stroke="#D85A30" stroke-width="1.2" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+<text x="326" y="440" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#993C1D">metadata only</text>
+
+<!-- LAYER 4: External Threat Intel -->
+<rect x="30" y="453" width="620" height="100" rx="14" fill="#FAECE7" stroke="#D85A30" stroke-width="0.8"/>
+<text x="50" y="475" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#4A1B0C">External threat intelligence  (public APIs, provider feeds)</text>
+
+<rect x="50" y="484" width="110" height="52" rx="6" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="105" y="513" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Domain reputation</text>
+
+<rect x="175" y="484" width="110" height="52" rx="6" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="230" y="513" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Breach feeds</text>
+
+<rect x="300" y="484" width="110" height="52" rx="6" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="355" y="513" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Login alert feeds</text>
+
+<rect x="425" y="484" width="110" height="52" rx="6" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="480" y="513" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Threat indicators</text>
+
+<rect x="550" y="484" width="78" height="52" rx="6" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="589" y="513" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Broker DB</text>
+
+<!-- privacy fence label -->
+<text x="340" y="570" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">⚑ PII boundary: only domain names and public identifiers cross the local → edge boundary</text>
+
+</svg>
+</div>
+
+<!-- PHISHING DETECTION -->
+<div class="diagram-panel" id="panel-phishing">
+<svg width="100%" viewBox="0 0 680 480" role="img">
+<title>Phishing and malicious link detection flow</title>
+<desc>Step-by-step flow from user URL input through local signal extraction and Cloudflare reputation enrichment to scored alert rendering.</desc>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- User -->
+<rect x="30" y="20" width="100" height="50" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="80" y="43" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">User</text>
+<text x="80" y="58" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Pastes URL</text>
+
+<line x1="130" y1="45" x2="158" y2="45" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Input validation -->
+<rect x="160" y="20" width="120" height="50" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="220" y="43" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Input validation</text>
+<text x="220" y="57" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">URI parse + sanitise</text>
+
+<line x1="280" y1="45" x2="308" y2="45" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Signal extractor -->
+<rect x="310" y="10" width="160" height="70" rx="8" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="390" y="32" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">UrlSignalExtractor</text>
+<text x="390" y="46" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Shannon entropy</text>
+<text x="390" y="58" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Suspicious tokens · risky TLD</text>
+<text x="390" y="70" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Query anomaly score</text>
+
+<!-- down from extractor -->
+<line x1="390" y1="80" x2="390" y2="118" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Risk scorer -->
+<rect x="290" y="120" width="200" height="90" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="390" y="142" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">RiskAssessmentBuilder</text>
+<text x="390" y="157" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Risk = w₁·URL + w₂·Msg + w₃·Rep</text>
+<text x="390" y="170" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Confidence floor = 0.50</text>
+<text x="390" y="183" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Dual-signal gate for critical</text>
+<text x="390" y="198" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Reason-code list</text>
+
+<!-- Enrichment: call worker (right side) -->
+<line x1="472" y1="155" x2="548" y2="155" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="507" y="148" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">domain</text>
+
+<!-- Worker box -->
+<rect x="550" y="125" width="110" height="62" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.8"/>
+<text x="605" y="147" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C" dominant-baseline="central">CF Worker</text>
+<text x="605" y="161" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Reputation API</text>
+<text x="605" y="173" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">1500ms timeout</text>
+
+<!-- Worker returns reputation -->
+<line x1="548" y1="175" x2="473" y2="175" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+<text x="507" y="171" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">rep score</text>
+
+<!-- Offline fallback note -->
+<text x="605" y="200" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">↳ offline fallback:</text>
+<text x="605" y="213" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">local signals only</text>
+
+<!-- Down from scorer -->
+<line x1="390" y1="211" x2="390" y2="248" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Severity mapping -->
+<rect x="290" y="250" width="200" height="80" rx="8" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="390" y="268" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">RiskClassifier</text>
+<text x="390" y="282" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">≥0.85 → critical</text>
+<text x="390" y="294" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">0.65-0.85 → high</text>
+<text x="390" y="306" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">0.40-0.65 → medium</text>
+<text x="390" y="318" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">&lt;0.40 → low</text>
+
+<line x1="390" y1="330" x2="390" y2="360" stroke="#BA7517" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Security Center card -->
+<rect x="270" y="362" width="240" height="74" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.8"/>
+<text x="390" y="382" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Security Center card</text>
+<text x="390" y="396" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Severity color · confidence %</text>
+<text x="390" y="408" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Reason-code chips</text>
+<text x="390" y="420" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Remediation CTA</text>
+
+<!-- PII label -->
+<rect x="30" y="130" width="220" height="36" rx="6" fill="none" stroke="#888780" stroke-dasharray="4 3" stroke-width="0.8"/>
+<text x="140" y="146" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780" dominant-baseline="central">Local boundary (on-device)</text>
+<text x="140" y="158" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">No PII leaves this zone</text>
+
+<text x="340" y="468" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">All scanning completes in &lt;2 s end-to-end</text>
+</svg>
+</div>
+
+<!-- CREDENTIAL HYGIENE -->
+<div class="diagram-panel" id="panel-credential">
+<svg width="100%" viewBox="0 0 680 440" role="img">
+<title>Credential hygiene and remediation flow</title>
+<desc>Credential input goes through local analysis for strength and reuse scoring, stored as a hash snapshot, then feeds a remediation state machine and the triage queue.</desc>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- Input -->
+<rect x="40" y="30" width="110" height="52" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="95" y="53" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">User input</text>
+<text x="95" y="67" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Credential entry</text>
+
+<line x1="150" y1="56" x2="178" y2="56" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="162" y="50" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">local only</text>
+
+<!-- Analyzer -->
+<rect x="180" y="20" width="160" height="72" rx="8" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="260" y="40" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">CredentialAnalyzer</text>
+<text x="260" y="54" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Strength: len + char diversity</text>
+<text x="260" y="66" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Reuse detection (hashed)</text>
+<text x="260" y="78" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Pattern weakness scan</text>
+
+<line x1="340" y1="56" x2="368" y2="56" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Credential risk score -->
+<rect x="370" y="20" width="170" height="72" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="455" y="40" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Credential risk score</text>
+<text x="455" y="54" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">0.35·Strength + 0.40·Reuse</text>
+<text x="455" y="66" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">+ 0.25·Exposure</text>
+<text x="455" y="78" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">→ informational / warning / critical</text>
+
+<!-- Arrow down from analyzer to hash store -->
+<line x1="260" y1="92" x2="260" y2="148" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="270" y="125" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">hash only</text>
+
+<!-- Hash store -->
+<rect x="180" y="150" width="160" height="56" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="260" y="170" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Encrypted local store</text>
+<text x="260" y="184" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">CredentialRiskSnapshot</text>
+<text x="260" y="196" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">No plaintext persisted</text>
+
+<!-- Arrow from score to remediation planner -->
+<line x1="455" y1="92" x2="455" y2="148" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Remediation planner -->
+<rect x="370" y="150" width="170" height="86" rx="8" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="455" y="170" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">RemediationPlanner</text>
+<text x="455" y="185" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Generates ordered task list</text>
+<text x="455" y="197" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">State: not started → done</text>
+<text x="455" y="209" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Escalation at 3d / 7d overdue</text>
+<text x="455" y="221" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Reminder notifications</text>
+
+<!-- State machine boxes -->
+<line x1="260" y1="206" x2="260" y2="258" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="370" y1="236" x2="260" y2="258" stroke="#BA7517" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<rect x="50" y="260" width="420" height="44" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.8"/>
+<text x="260" y="278" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Unified triage queue  (Security Center)</text>
+<text x="260" y="292" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Credential findings merged with phishing alerts, ranked by severity × confidence × risk-reduction</text>
+
+<!-- down to CTA -->
+<line x1="260" y1="304" x2="260" y2="336" stroke="#BA7517" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<rect x="110" y="338" width="300" height="56" rx="8" fill="#FAC775" stroke="#BA7517" stroke-width="0.8"/>
+<text x="260" y="358" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Remediation CTA</text>
+<text x="260" y="372" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Step-by-step rotation guide</text>
+<text x="260" y="384" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Account-hardening checklist</text>
+
+<text x="340" y="430" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">Zero Cloudflare calls in this flow — credential analysis is fully local</text>
+</svg>
+</div>
+
+<!-- EXPOSURE & LOGIN -->
+<div class="diagram-panel" id="panel-exposure">
+<svg width="100%" viewBox="0 0 680 430" role="img">
+<title>Exposure and login anomaly detection</title>
+<desc>Provider alert feeds are ingested, normalized with privacy-safe hashing, then correlated by the Risk Orchestrator with phishing and credential signals to produce a prioritized playbook.</desc>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" marknHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- External feeds -->
+<rect x="20" y="20" width="170" height="100" rx="10" fill="#FAECE7" stroke="#D85A30" stroke-width="0.8"/>
+<text x="105" y="40" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Breach / exposure feeds</text>
+<rect x="34" y="50" width="140" height="30" rx="5" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="104" y="66" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#4A1B0C" dominant-baseline="central">HIBP-style breach metadata</text>
+<rect x="34" y="85" width="140" height="30" rx="5" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="104" y="101" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#4A1B0C" dominant-baseline="central">Dark-web indicator feeds</text>
+
+<rect x="20" y="140" width="170" height="100" rx="10" fill="#FAECE7" stroke="#D85A30" stroke-width="0.8"/>
+<text x="105" y="160" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#4A1B0C" dominant-baseline="central">Login alert feeds</text>
+<rect x="34" y="170" width="140" height="30" rx="5" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="104" y="186" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#4A1B0C" dominant-baseline="central">Provider login events</text>
+<rect x="34" y="205" width="140" height="30" rx="5" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="104" y="221" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#4A1B0C" dominant-baseline="central">Heuristic anomaly checks</text>
+
+<!-- Arrows to worker -->
+<line x1="190" y1="70" x2="248" y2="100" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="190" y1="190" x2="248" y2="165" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="218" y="95" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">metadata</text>
+
+<!-- Worker: normalizer -->
+<rect x="250" y="100" width="150" height="80" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.8"/>
+<text x="325" y="122" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#04342C" dominant-baseline="central">CF Worker</text>
+<text x="325" y="137" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Adapter + normalizer</text>
+<text x="325" y="149" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">k-anonymity hash query</text>
+<text x="325" y="161" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">Schema normalization</text>
+<text x="325" y="173" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">No raw email sent</text>
+
+<line x1="400" y1="140" x2="428" y2="140" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+<text x="413" y="133" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">normalized</text>
+
+<!-- Risk orchestrator (local) -->
+<rect x="430" y="80" width="200" height="120" rx="8" fill="#CECBF6" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="530" y="102" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Risk Orchestrator  (local)</text>
+<text x="530" y="117" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Correlates: phishing + cred</text>
+<text x="530" y="129" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">+ exposure + login signals</text>
+<text x="530" y="144" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Priority = 0.45·Sev + 0.30·Conf</text>
+<text x="530" y="156" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">+ 0.25·ActionUrgency</text>
+<text x="530" y="171" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Explainable reason codes</text>
+<text x="530" y="185" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Takeover playbooks</text>
+
+<line x1="530" y1="200" x2="530" y2="240" stroke="#BA7517" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="400" y1="280" x2="530" y2="241" stroke="#BA7517" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Exposure timeline + takeover playbook -->
+<rect x="350" y="242" width="200" height="70" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.8"/>
+<text x="450" y="262" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Security Center</text>
+<text x="450" y="276" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Exposure timeline UI</text>
+<text x="450" y="288" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Takeover-prevention playbook</text>
+<text x="450" y="300" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Mitigation acknowledgement</text>
+
+<!-- Feedback acknowledged to provider -->
+<line x1="350" y1="280" x2="210" y2="260" stroke="#D85A30" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+<text x="280" y="300" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#993C1D">user ack status →</text>
+
+<text x="340" y="420" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">Only hashed identifiers (k-anonymity) cross the local → edge boundary</text>
+</svg>
+</div>
+
+<!-- UNIFIED TRIAGE -->
+<div class="diagram-panel" id="panel-triage">
+<svg width="100%" viewBox="0 0 680 420" role="img">
+<title>Unified triage queue logic</title>
+<desc>Three alert sources feed into the UnifiedTriageService which ranks items by a deterministic scoring formula and pushes ordered actions to the Security Center queue.</desc>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" marknHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- Three source queues -->
+<rect x="20" y="20" width="150" height="58" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="95" y="42" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Phishing alerts</text>
+<text x="95" y="56" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Source: phishing module</text>
+<text x="95" y="68" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Fields: sev · conf · ts</text>
+
+<rect x="20" y="100" width="150" height="58" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="95" y="122" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Credential actions</text>
+<text x="95" y="136" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Source: credential module</text>
+<text x="95" y="148" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Fields: sev · conf · ts</text>
+
+<rect x="20" y="180" width="150" height="58" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8"/>
+<text x="95" y="202" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">Exposure alerts</text>
+<text x="95" y="216" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Source: exposure module</text>
+<text x="95" y="228" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Fields: sev · conf · urgency</text>
+
+<!-- Arrows to triage -->
+<line x1="170" y1="49" x2="248" y2="160" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="170" y1="129" x2="248" y2="165" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+<line x1="170" y1="209" x2="248" y2="175" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Triage service -->
+<rect x="250" y="100" width="200" height="150" rx="10" fill="#CECBF6" stroke="#7F77DD" stroke-width="1"/>
+<text x="350" y="122" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#26215C" dominant-baseline="central">UnifiedTriageService</text>
+
+<rect x="262" y="132" width="176" height="50" rx="6" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+<text x="350" y="150" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#26215C" dominant-baseline="central">Ranking formula</text>
+<text x="350" y="165" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">0.5·Sev + 0.3·Conf + 0.2·RiskReduc</text>
+<text x="350" y="178" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">×100, tie-break: phishing &gt; cred &gt; exp</text>
+
+<text x="350" y="200" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Filters: source · severity · status</text>
+<text x="350" y="214" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Quick actions: start · snooze · done</text>
+<text x="350" y="228" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#3C3489">Memoised re-sort on update</text>
+
+<!-- Arrow out to queue UI -->
+<line x1="450" y1="175" x2="490" y2="175" stroke="#BA7517" stroke-width="1.2" marker-end="url(#arr)"/>
+
+<!-- Ordered queue UI -->
+<rect x="492" y="90" width="168" height="170" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.8"/>
+<text x="576" y="112" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">Security Center queue</text>
+
+<rect x="506" y="122" width="140" height="32" rx="5" fill="#FAC775" stroke="#BA7517" stroke-width="0.5"/>
+<text x="576" y="135" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#412402" dominant-baseline="central">① CRITICAL — phishing</text>
+<text x="576" y="147" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">conf 94%</text>
+
+<rect x="506" y="162" width="140" height="32" rx="5" fill="#F5C4B3" stroke="#D85A30" stroke-width="0.5"/>
+<text x="576" y="175" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#4A1B0C" dominant-baseline="central">② HIGH — cred reuse</text>
+<text x="576" y="187" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#712B13">conf 81%</text>
+
+<rect x="506" y="202" width="140" height="32" rx="5" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+<text x="576" y="215" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" font-weight="500" fill="#04342C" dominant-baseline="central">③ MEDIUM — exposure</text>
+<text x="576" y="227" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#0F6E56">conf 67%</text>
+
+<text x="576" y="248" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">+ more…</text>
+
+<!-- remediation loop back -->
+<line x1="576" y1="260" x2="576" y2="310" stroke="#BA7517" stroke-width="1" marker-end="url(#arr)"/>
+<rect x="460" y="312" width="230" height="44" rx="8" fill="#FAC775" stroke="#BA7517" stroke-width="0.8"/>
+<text x="575" y="330" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="11" font-weight="500" fill="#412402" dominant-baseline="central">RemediationPlanner CTA</text>
+<text x="575" y="344" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#633806">Guides user through ordered fix steps</text>
+
+<text x="340" y="410" text-anchor="middle" font-family="var(--font-sans,sans-serif)" font-size="10" fill="#888780">All triage computation runs locally — no network required</text>
+</svg>
+</div>
+
+<div class="callout-row" id="callouts-overview">
+  <div class="callout accent-purple">
+    <div class="callout-title">Local-first by design</div>
+    <div class="callout-body">All sensitive processing runs on-device. Raw URLs, passwords, and account hashes never leave the Flutter app.</div>
+  </div>
+  <div class="callout accent-teal">
+    <div class="callout-title">Edge enrichment only</div>
+    <div class="callout-body">Cloudflare Workers receive only non-PII metadata: domain names, public threat indicators, opt-out templates, health pings.</div>
+  </div>
+  <div class="callout accent-coral">
+    <div class="callout-title">Threat intel adapters</div>
+    <div class="callout-body">External feeds are queried through k-anonymity hashing (e.g. HIBP model) so account identifiers are never transmitted in plain form.</div>
+  </div>
+  <div class="callout accent-amber">
+    <div class="callout-title">Security Center UI</div>
+    <div class="callout-body">All four modules — phishing, credentials, exposure, login anomalies — surface through one ranked triage queue with colour-coded severity and remediation CTAs.</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.diagram-panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('visible');
+  event.currentTarget.classList.add('active');
+
+  const callouts = document.getElementById('callouts-overview');
+  if (callouts) callouts.style.display = (id === 'overview') ? '' : 'none';
+}
+</script>
+</body>
+</html>
