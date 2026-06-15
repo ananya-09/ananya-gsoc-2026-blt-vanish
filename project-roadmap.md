@@ -2,11 +2,7 @@
 
 ## Overview
 
----
-
 This roadmap maps the Community Bonding period and a 12-week development cadence across three phases (Phase 1–3), plus CI, testing, documentation, and final handover. Each phase lists weekly goals, key deliverables, acceptance criteria, and mentor checkpoints.
-
----
 
 ## Timeline (high level)
 
@@ -15,8 +11,6 @@ This roadmap maps the Community Bonding period and a 12-week development cadence
   - Phase 1 (Weeks 1–4): Foundational risk engine, phishing MVP, Security Center UX
   - Phase 2 (Weeks 5–8): Credential hygiene, remediation orchestration, unified triage
   - Phase 3 (Weeks 9–12): Exposure ingestion, login-anomaly detection, release hardening
-
----
 
 ## Milestones & Week-by-week Plan
 
@@ -91,15 +85,12 @@ This roadmap maps the Community Bonding period and a 12-week development cadence
   - Final documentation, demo scripts, and release artifacts
   - Mentor walkthrough and handover package
 
----
 
 ## CI, Testing & Performance Gates
 
 - CI gates per phase (`ci/phase1-gate.yml`, `ci/phase2-gate.yml`, `ci/phase3-gate.yml`)
   - Required checks: static analyze, unit tests, integration tests, performance budget
 - Benchmarks: precision/recall for phishing detection, scan latency, memory and battery impact
-
----
 
 ## Documentation & Demos
 
